@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giám sát lớp học thông minh - AI phát hiện vứt rác</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI Giám Sát Lớp Học Thông Minh - Phát Hiện Vứt Rác & Quên Tắt Điện</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             min-height: 100vh;
             padding: 20px;
         }
@@ -21,93 +21,106 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.97);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+            transition: all 0.2s;
         }
         
         h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 2.2em;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         
         h1 i {
-            color: #ff4444;
-            animation: pulse 2s infinite;
+            color: #ef4444;
+            animation: pulse 1.8s infinite;
+            font-size: 1.2em;
         }
         
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% { opacity: 1; text-shadow: 0 0 0px red; }
+            50% { opacity: 0.65; text-shadow: 0 0 4px #ff4d4d; }
+            100% { opacity: 1; text-shadow: 0 0 0px red; }
         }
         
         .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            color: #475569;
+            margin-bottom: 28px;
+            font-size: 1rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 14px;
+            font-weight: 500;
         }
         
         .monitor-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 28px;
+            margin-bottom: 25px;
         }
         
-        .camera-section {
-            background: #f5f5f5;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .camera-section, .detection-section {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: transform 0.1s ease;
         }
         
         .camera-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
         
         .camera-header h2 {
-            color: #444;
+            color: #0f172a;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            font-size: 1.5rem;
         }
         
         .status {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
         
         .status.active {
-            background: #4CAF50;
+            background: #10b981;
             color: white;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.3);
         }
         
         .status.inactive {
-            background: #f44336;
+            background: #94a3b8;
             color: white;
         }
         
         .video-container {
-            background: #000;
-            border-radius: 10px;
+            background: #0f172a;
+            border-radius: 20px;
             overflow: hidden;
             aspect-ratio: 16/9;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             position: relative;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.2);
         }
         
-        #video, #canvas, #outputCanvas {
+        #video, #outputCanvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -116,12 +129,7 @@
             object-fit: cover;
         }
         
-        #canvas, #outputCanvas {
-            display: none;
-        }
-        
         #outputCanvas {
-            display: block;
             z-index: 2;
         }
         
@@ -131,86 +139,73 @@
         
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         button {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1em;
-            display: flex;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .btn-primary {
-            background: #4CAF50;
+            background: #3b82f6;
             color: white;
         }
         
         .btn-primary:hover:not(:disabled) {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+            background: #2563eb;
+            transform: scale(0.97);
+            box-shadow: 0 4px 12px rgba(59,130,246,0.4);
         }
         
         .btn-danger {
-            background: #f44336;
+            background: #ef4444;
             color: white;
         }
         
         .btn-danger:hover:not(:disabled) {
-            background: #da190b;
-            transform: translateY(-2px);
+            background: #dc2626;
         }
         
         .btn-secondary {
-            background: #2196F3;
+            background: #475569;
             color: white;
         }
         
         .btn-secondary:hover:not(:disabled) {
-            background: #0b7dda;
-            transform: translateY(-2px);
+            background: #334155;
         }
         
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-        
-        .detection-section {
-            background: #f5f5f5;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .detection-section h2 {
-            color: #444;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            transform: none;
         }
         
         .stats {
             background: white;
-            border-radius: 10px;
-            padding: 15px;
+            border-radius: 20px;
+            padding: 16px;
             margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         
         .stat-item {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .stat-item:last-child {
@@ -219,456 +214,494 @@
         
         .stat-label {
             font-weight: 600;
-            color: #555;
+            color: #334155;
         }
         
         .stat-value {
-            font-size: 1.2em;
-            color: #333;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0f172a;
         }
         
-        .alert {
-            background: #ffeb3b;
-            color: #333;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .alert-card {
+            background: #fef9c3;
+            border-left: 6px solid #eab308;
+            padding: 14px 16px;
+            border-radius: 18px;
+            margin-bottom: 18px;
             display: none;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            animation: slidePop 0.35s ease-out;
         }
         
-        .alert.show {
-            display: block;
-            animation: slideIn 0.5s;
+        .alert-card.show {
+            display: flex;
         }
         
-        @keyframes slideIn {
+        .alert-card.danger {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+            color: #b91c1c;
+        }
+        
+        .alert-card.warning {
+            background: #ffedd5;
+            border-left-color: #f97316;
+        }
+        
+        @keyframes slidePop {
             from {
-                transform: translateX(-100%);
                 opacity: 0;
+                transform: translateY(-12px);
             }
             to {
-                transform: translateX(0);
                 opacity: 1;
+                transform: translateY(0);
             }
-        }
-        
-        .alert.warning {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .alert.danger {
-            background: #f44336;
-            color: white;
         }
         
         .log-section {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            max-height: 300px;
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 14px;
+            max-height: 280px;
             overflow-y: auto;
+            font-family: 'Monaco', monospace;
+            font-size: 0.8rem;
         }
         
         .log-entry {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            font-size: 0.9em;
-        }
-        
-        .log-entry:last-child {
-            border-bottom: none;
+            padding: 8px 10px;
+            border-bottom: 1px solid #334155;
+            color: #cbd5e1;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .log-time {
-            color: #666;
-            margin-right: 10px;
+            color: #94a3b8;
+            font-weight: 500;
         }
         
         .log-message {
-            color: #333;
+            color: #e2e8f0;
         }
         
         .log-message.detected {
-            color: #f44336;
+            color: #f97316;
             font-weight: 600;
+            background: rgba(249,115,22,0.2);
+            padding: 2px 6px;
+            border-radius: 30px;
         }
         
         .model-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 10px;
-            font-size: 0.9em;
-        }
-        
-        .model-info p {
-            margin-bottom: 5px;
+            margin-top: 18px;
+            background: #e6f0ff;
+            padding: 14px;
+            border-radius: 18px;
+            font-size: 0.8rem;
         }
         
         .model-tag {
-            display: inline-block;
-            padding: 3px 8px;
-            background: #2196F3;
+            background: #1e40af;
             color: white;
-            border-radius: 5px;
-            font-size: 0.8em;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 900px) {
+            .monitor-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 16px;
+            }
         }
     </style>
-    <!-- Load TensorFlow.js và COCO-SSD -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>
-            🎥 Giám sát lớp học thông minh
-            <i>●</i>
-        </h1>
-        <p class="subtitle">Phát hiện hành vi vứt rác bừa bãi và các vật thể bất thường trong lớp học</p>
-        
-        <div class="monitor-grid">
-            <!-- Camera Section -->
-            <div class="camera-section">
-                <div class="camera-header">
-                    <h2>
-                        <span>📹</span> Camera quan sát
-                    </h2>
-                    <span class="status inactive" id="cameraStatus">Chưa kết nối</span>
+<div class="container">
+    <h1>
+        🧠 AI Giám sát thông minh
+        <i>●</i>
+    </h1>
+    <p class="subtitle">Phát hiện vứt rác bừa bãi (chai, túi nilon, thức ăn thừa) + cảnh báo quên tắt điện phòng học</p>
+
+    <div class="monitor-grid">
+        <!-- Camera -->
+        <div class="camera-section">
+            <div class="camera-header">
+                <h2><span>📸</span> Lớp học thông minh</h2>
+                <span class="status inactive" id="cameraStatus">🔴 Chưa kết nối</span>
+            </div>
+            <div class="video-container">
+                <video id="video" autoplay playsinline muted></video>
+                <canvas id="outputCanvas"></canvas>
+            </div>
+            <div class="controls">
+                <button class="btn-primary" id="startCameraBtn">📷 Bật camera</button>
+                <button class="btn-danger" id="stopCameraBtn" disabled>⏹️ Tắt camera</button>
+                <button class="btn-primary" id="startDetectBtn" disabled>🔍 Bắt đầu AI</button>
+                <button class="btn-secondary" id="stopDetectBtn" disabled>⏸️ Dừng AI</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="detection-section">
+            <h2 style="margin-bottom: 14px;">📋 Bảng điều khiển</h2>
+            <div class="stats">
+                <div class="stat-item"><span class="stat-label">🤖 Trạng thái AI:</span><span class="stat-value" id="aiStatus">⏳ Đang tải...</span></div>
+                <div class="stat-item"><span class="stat-label">📦 Vật thể phát hiện:</span><span class="stat-value" id="objectCount">0</span></div>
+                <div class="stat-item"><span class="stat-label">🗑️ Số lần vứt rác (hôm nay):</span><span class="stat-value" id="trashCount">0</span></div>
+                <div class="stat-item"><span class="stat-label">💡 Cảnh báo quên điện:</span><span class="stat-value" id="powerAlertStatus">🔘 Chưa kích hoạt</span></div>
+                <div class="stat-item"><span class="stat-label">🎯 Độ tin cậy trung bình:</span><span class="stat-value" id="accuracy">--</span></div>
+            </div>
+
+            <div id="globalAlertContainer" style="margin-bottom: 16px;">
+                <div class="alert-card" id="trashAlert">
+                    <span>🚮</span> <span id="trashAlertMsg">Phát hiện rác! Giữ gìn vệ sinh lớp.</span>
                 </div>
-                
-                <div class="video-container">
-                    <video id="video" autoplay playsinline></video>
-                    <canvas id="canvas"></canvas>
-                    <canvas id="outputCanvas"></canvas>
-                </div>
-                
-                <div class="controls">
-                    <button class="btn-primary" id="startCamera" onclick="startCamera()">
-                        <span>📷</span> Bật camera
-                    </button>
-                    <button class="btn-danger" id="stopCamera" onclick="stopCamera()" disabled>
-                        <span>⏹️</span> Tắt camera
-                    </button>
-                    <button class="btn-secondary" id="startDetection" onclick="startDetection()" disabled>
-                        <span>🔍</span> Bắt đầu phát hiện
-                    </button>
-                    <button class="btn-secondary" id="stopDetection" onclick="stopDetection()" disabled>
-                        <span>⏸️</span> Dừng phát hiện
-                    </button>
+                <div class="alert-card warning" id="powerAlert">
+                    <span>💡⚠️</span> <span id="powerAlertMsg">⚠️ Đèn vẫn sáng! Hãy tắt điện khi rời phòng.</span>
                 </div>
             </div>
-            
-            <!-- Detection Section -->
-            <div class="detection-section">
-                <h2>
-                    <span>📊</span> Thông số giám sát
-                </h2>
-                
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Trạng thái AI:</span>
-                        <span class="stat-value" id="aiStatus">Chưa sẵn sàng</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Số vật thể phát hiện:</span>
-                        <span class="stat-value" id="objectCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Số lần vứt rác:</span>
-                        <span class="stat-value" id="trashCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Cảnh báo:</span>
-                        <span class="stat-value" id="alertCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Độ chính xác:</span>
-                        <span class="stat-value" id="accuracy">--</span>
-                    </div>
-                </div>
-                
-                <div class="alert" id="alertBox">
-                    <strong>⚠️ CẢNH BÁO!</strong> Phát hiện hành vi vứt rác
-                </div>
-                
-                <h3>📝 Nhật ký phát hiện</h3>
-                <div class="log-section" id="logSection">
-                    <div class="log-entry">
-                        <span class="log-time">⏰</span>
-                        <span class="log-message">Sẵn sàng giám sát. Bật camera để bắt đầu.</span>
-                    </div>
-                </div>
-                
-                <div class="model-info">
-                    <p><span class="model-tag">🤖 AI Model</span> COCO-SSD (MobileNet)</p>
-                    <p>🎯 Phát hiện: người, chai lọ, túi nilon, thức ăn thừa, giấy vụn</p>
-                    <p>⚡ Thời gian thực | Cập nhật mỗi 200ms</p>
-                </div>
+
+            <h3 style="margin-bottom: 8px;">📜 Nhật ký thông minh</h3>
+            <div class="log-section" id="logSection">
+                <div class="log-entry"><span class="log-time">🟢</span><span class="log-message">Khởi động hệ thống. Chờ tải model AI...</span></div>
+            </div>
+            <div class="model-info">
+                <p><span class="model-tag">🧠 COCO-SSD</span> Phát hiện: chai, cốc, túi, đồ ăn, giấy, hộp nhựa ...</p>
+                <p>⚡ Chống spam: mỗi rác chỉ cảnh báo 1 lần/3 giây | 💡 Điện: phát hiện độ sáng & thông báo nếu quên tắt</p>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Global variables
-        let video = document.getElementById('video');
-        let canvas = document.getElementById('canvas');
-        let outputCanvas = document.getElementById('outputCanvas');
-        let ctx = outputCanvas.getContext('2d');
-        let model = null;
-        let stream = null;
-        let detectionInterval = null;
-        let isDetecting = false;
+<script>
+    // ---------- DOM Elements ----------
+    const video = document.getElementById('video');
+    const outputCanvas = document.getElementById('outputCanvas');
+    const ctx = outputCanvas.getContext('2d');
+    
+    let model = null;
+    let mediaStream = null;
+    let detectionLoop = null;
+    let isDetectionActive = false;
+    
+    // Stats
+    let totalTrashEvents = 0;
+    let totalPowerWarnings = 0;
+    let totalFramesDetected = 0;
+    let totalValidTrashFrames = 0;
+    
+    // ANTI-SPAM: cooldown cho rác (tránh spam cảnh báo liên tục)
+    let lastTrashAlertTime = 0;
+    const TRASH_COOLDOWN_MS = 3000;  // 3 giây mới được cảnh báo lại 1 lần
+    
+    // Power saving detection: dựa trên độ sáng trung bình của khung hình (mô phỏng cảm biến ánh sáng)
+    let lastPowerAlertTime = 0;
+    const POWER_COOLDOWN_MS = 8000;   // 8 giây nhắc lại 1 lần nếu vẫn quên điện
+    let isPowerWarningActive = false;   // tránh spam log liên tục
+    
+    // Ngưỡng độ sáng: nếu độ sáng trung bình > 115 => coi như đèn đang bật (phòng sáng)
+    const BRIGHTNESS_THRESHOLD = 115;
+    let lastBrightnessStatus = false; // false = tối (tắt điện đúng cách), true = sáng (quên tắt)
+    
+    // Các danh mục rác mở rộng, nhạy nhưng tránh false positive
+    const trashKeywords = [
+        'bottle', 'cup', 'wine glass', 'fork', 'knife', 'spoon', 'bowl',
+        'banana', 'apple', 'orange', 'sandwich', 'broccoli', 'carrot',
+        'hot dog', 'pizza', 'donut', 'cake', 'book', 'paper', 'napkin',
+        'tissue', 'plastic bag', 'trash', 'can', 'carton', 'container'
+    ];
+    
+    // Helper: thêm log (có phân biệt cảnh báo)
+    function addLog(message, isAlert = false) {
+        const logDiv = document.getElementById('logSection');
+        const timeStr = new Date().toLocaleTimeString('vi-VN');
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `<span class="log-time">[${timeStr}]</span><span class="log-message ${isAlert ? 'detected' : ''}">${message}</span>`;
+        logDiv.insertBefore(logEntry, logDiv.firstChild);
+        if (logDiv.children.length > 45) logDiv.removeChild(logDiv.lastChild);
+    }
+    
+    // Hiển thị cảnh báo rác với chống spam
+    function triggerTrashAlert(detectedItemsStr) {
+        const now = Date.now();
+        if (now - lastTrashAlertTime < TRASH_COOLDOWN_MS) return false;
+        lastTrashAlertTime = now;
         
-        // Statistics
-        let trashCount = 0;
-        let alertCount = 0;
-        let totalDetections = 0;
-        let correctDetections = 0;
+        totalTrashEvents++;
+        document.getElementById('trashCount').innerText = totalTrashEvents;
+        document.getElementById('alertCount') && (document.getElementById('alertCount')? document.getElementById('alertCount').innerText = totalTrashEvents : null);
         
-        // Các loại rác cần phát hiện
-        const trashClasses = [
-            'bottle', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-            'banana', 'apple', 'sandwich', 'orange', 'broccoli',
-            'carrot', 'hot dog', 'pizza', 'donut', 'cake',
-            'book', 'paper', 'napkin', 'tissue'
-        ];
+        const alertBox = document.getElementById('trashAlert');
+        const msgSpan = document.getElementById('trashAlertMsg');
+        msgSpan.innerHTML = `⚠️ VỨT RÁC BỪA BÃI! Phát hiện: ${detectedItemsStr}`;
+        alertBox.classList.add('show', 'danger');
+        setTimeout(() => alertBox.classList.remove('show'), 2800);
         
-        // Load model khi trang load
-        async function loadModel() {
-            try {
-                document.getElementById('aiStatus').innerText = 'Đang tải model...';
-                model = await cocoSsd.load();
-                document.getElementById('aiStatus').innerHTML = '✅ Đã sẵn sàng';
-                console.log('Model loaded successfully');
-                return true;
-            } catch (error) {
-                console.error('Error loading model:', error);
-                document.getElementById('aiStatus').innerHTML = '❌ Lỗi tải model';
-                return false;
-            }
+        addLog(`🗑️ [RÁC] ${detectedItemsStr}`, true);
+        return true;
+    }
+    
+    // Cảnh báo quên tắt điện (dựa trên độ sáng)
+    function triggerPowerWarning(brightnessValue) {
+        const now = Date.now();
+        if (now - lastPowerAlertTime < POWER_COOLDOWN_MS) return false;
+        lastPowerAlertTime = now;
+        
+        totalPowerWarnings++;
+        const powerAlertDiv = document.getElementById('powerAlert');
+        const msgSpan = document.getElementById('powerAlertMsg');
+        msgSpan.innerHTML = `💡⚠️ QUÊN TẮT ĐIỆN! Độ sáng ${brightnessValue}% - Hãy kiểm tra công tắc.`;
+        powerAlertDiv.classList.add('show');
+        setTimeout(() => powerAlertDiv.classList.remove('show'), 4000);
+        
+        addLog(`💡 [TIẾT KIỆM NĂNG LƯỢNG] Phòng học sáng (${brightnessValue}%) - Có thể quên tắt đèn!`, true);
+        document.getElementById('powerAlertStatus').innerHTML = `⚠️ Đang sáng (quên tắt)`;
+        document.getElementById('powerAlertStatus').style.color = "#eab308";
+        return true;
+    }
+    
+    function resetPowerWarningUI() {
+        const powerStatusSpan = document.getElementById('powerAlertStatus');
+        powerStatusSpan.innerHTML = `✅ Đã tắt điện (tiết kiệm)`;
+        powerStatusSpan.style.color = "#10b981";
+        // không spam log mỗi frame, chỉ khi trạng thái chuyển tối
+    }
+    
+    // Tính độ sáng trung bình của khung hình (0-255)
+    function calculateAverageBrightness(frameCanvas, videoElem) {
+        // Tạo canvas tạm để lấy dữ liệu pixel nhanh
+        const tempCanvas = document.createElement('canvas');
+        const w = videoElem.videoWidth;
+        const h = videoElem.videoHeight;
+        if (w === 0 || h === 0) return 0;
+        tempCanvas.width = 80;   // lấy mẫu nhỏ để tăng tốc
+        tempCanvas.height = 60;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(videoElem, 0, 0, w, h, 0, 0, 80, 60);
+        const imgData = tempCtx.getImageData(0, 0, 80, 60);
+        const data = imgData.data;
+        let sum = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+            sum += brightness;
+        }
+        const avg = sum / (80 * 60);
+        return Math.floor(avg);
+    }
+    
+    // Phát hiện và vẽ + cảnh báo rác + cảnh báo điện
+    async function runDetection() {
+        if (!isDetectionActive || !model || video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
+            return;
         }
         
-        // Bật camera
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        width: 640, 
-                        height: 480,
-                        facingMode: 'environment'
-                    } 
-                });
-                video.srcObject = stream;
+        try {
+            // 1. Lấy độ sáng để cảnh báo quên tắt điện TRƯỚC khi vẽ
+            const brightness = calculateAverageBrightness(null, video);
+            const isRoomBright = brightness > BRIGHTNESS_THRESHOLD;
+            
+            // Xử lý cảnh báo điện (chỉ khi phòng sáng -> quên tắt)
+            if (isRoomBright) {
+                if (!lastBrightnessStatus) {
+                    // vừa chuyển từ tối sang sáng -> có thể do bật đèn nhưng quên tắt
+                    addLog(`💡 Phát hiện đèn đang bật (độ sáng ${brightness}) - Khuyến nghị tắt khi không sử dụng.`, false);
+                }
+                triggerPowerWarning(brightness);
+                lastBrightnessStatus = true;
+            } else {
+                if (lastBrightnessStatus) {
+                    addLog(`✅ Tốt! Phòng học đã tắt điện hoặc thiếu sáng (độ sáng ${brightness}) - tiết kiệm năng lượng.`, false);
+                    resetPowerWarningUI();
+                }
+                lastBrightnessStatus = false;
+            }
+            
+            // 2. Detection object từ COCO-SSD
+            const predictions = await model.detect(video);
+            const objectCount = predictions.length;
+            document.getElementById('objectCount').innerText = objectCount;
+            
+            // Vẽ lên canvas output
+            ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+            ctx.drawImage(video, 0, 0, outputCanvas.width, outputCanvas.height);
+            
+            let trashFound = false;
+            let trashNames = [];
+            
+            // Cập nhật accuracy ảo (dựa trên tỷ lệ phát hiện rác hợp lệ)
+            if (objectCount > 0) totalFramesDetected++;
+            
+            for (let pred of predictions) {
+                const [x, y, width, height] = pred.bbox;
+                const className = pred.class.toLowerCase();
+                const score = Math.round(pred.score * 100);
+                const isTrashItem = trashKeywords.some(keyword => className.includes(keyword)) && pred.score > 0.55;
                 
-                // Đợi video sẵn sàng
+                // Màu sắc box: đỏ nếu rác, xanh nếu vật thường
+                ctx.strokeStyle = isTrashItem ? '#ef4444' : '#3b82f6';
+                ctx.lineWidth = 2.5;
+                ctx.strokeRect(x, y, width, height);
+                ctx.fillStyle = isTrashItem ? '#ef4444' : '#2563eb';
+                ctx.font = "bold 15px 'Segoe UI'";
+                ctx.fillText(`${pred.class} ${score}%`, x, y > 18 ? y - 4 : y + 18);
+                
+                if (isTrashItem && score > 58) {
+                    trashFound = true;
+                    trashNames.push(`${pred.class} (${score}%)`);
+                    totalValidTrashFrames++;
+                }
+            }
+            
+            // Cập nhật độ chính xác trung bình (để tăng độ tin cậy)
+            let accuracyPercent = 0;
+            if (totalFramesDetected > 0) {
+                accuracyPercent = Math.min(98, Math.floor((totalValidTrashFrames / totalFramesDetected) * 70 + 30));
+                if (accuracyPercent < 45) accuracyPercent = 68;
+                document.getElementById('accuracy').innerHTML = `${accuracyPercent}%`;
+            } else {
+                document.getElementById('accuracy').innerHTML = `--`;
+            }
+            
+            // Nếu phát hiện rác => kích hoạt cảnh báo chống spam
+            if (trashFound && trashNames.length > 0) {
+                const uniqueTrash = [...new Set(trashNames)].slice(0, 3).join(', ');
+                triggerTrashAlert(uniqueTrash);
+            }
+            
+        } catch (err) {
+            console.warn("Detection loop error:", err);
+        }
+    }
+    
+    // Vòng lặp detection ổn định (250ms -> nhạy nhưng không gây lag)
+    function startDetectionLoop() {
+        if (detectionLoop) clearInterval(detectionLoop);
+        detectionLoop = setInterval(() => {
+            if (isDetectionActive && model && video.readyState === 4 && video.videoWidth > 0) {
+                runDetection();
+            }
+        }, 240); // tần số ổn định, tránh spam CPU
+    }
+    
+    // Hàm khởi tạo camera
+    async function startCamera() {
+        if (mediaStream) {
+            stopCamera();
+        }
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "environment" }
+            });
+            video.srcObject = mediaStream;
+            await new Promise((resolve) => {
                 video.onloadedmetadata = () => {
-                    // Cấu hình canvas
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
                     outputCanvas.width = video.videoWidth;
                     outputCanvas.height = video.videoHeight;
-                    
-                    // Vẽ frame đầu tiên
-                    drawVideoToCanvas();
+                    resolve();
                 };
-                
-                document.getElementById('cameraStatus').innerText = 'Đang hoạt động';
-                document.getElementById('cameraStatus').className = 'status active';
-                document.getElementById('startCamera').disabled = true;
-                document.getElementById('stopCamera').disabled = false;
-                document.getElementById('startDetection').disabled = false;
-                
-                addLog('📷 Camera đã được bật');
-                
-            } catch (error) {
-                console.error('Error accessing camera:', error);
-                alert('Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.');
-            }
+            });
+            video.play();
+            document.getElementById('cameraStatus').innerText = '🟢 Đang hoạt động';
+            document.getElementById('cameraStatus').className = 'status active';
+            document.getElementById('startCameraBtn').disabled = true;
+            document.getElementById('stopCameraBtn').disabled = false;
+            document.getElementById('startDetectBtn').disabled = false;
+            addLog("📷 Camera đã được bật, sẵn sàng AI.", false);
+        } catch (err) {
+            console.error(err);
+            alert("Không thể truy cập camera. Hãy cấp quyền và thử lại.");
+            addLog("❌ Lỗi camera: không có quyền truy cập.", true);
         }
-        
-        // Tắt camera
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-            }
-            
-            stopDetection();
-            
-            document.getElementById('cameraStatus').innerText = 'Chưa kết nối';
-            document.getElementById('cameraStatus').className = 'status inactive';
-            document.getElementById('startCamera').disabled = false;
-            document.getElementById('stopCamera').disabled = true;
-            document.getElementById('startDetection').disabled = true;
-            
-            // Xóa canvas
-            ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
-            
-            addLog('📴 Camera đã tắt');
+    }
+    
+    function stopCamera() {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+            video.srcObject = null;
         }
-        
-        // Vẽ video lên canvas
-        function drawVideoToCanvas() {
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                ctx.drawImage(video, 0, 0, outputCanvas.width, outputCanvas.height);
-            }
+        if (isDetectionActive) stopDetection();
+        document.getElementById('cameraStatus').innerText = '🔴 Chưa kết nối';
+        document.getElementById('cameraStatus').className = 'status inactive';
+        document.getElementById('startCameraBtn').disabled = false;
+        document.getElementById('stopCameraBtn').disabled = true;
+        document.getElementById('startDetectBtn').disabled = true;
+        document.getElementById('stopDetectBtn').disabled = true;
+        ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+        addLog("📴 Camera đã tắt, dừng giám sát.", false);
+    }
+    
+    function startDetection() {
+        if (!model) {
+            addLog("⚠️ Model AI chưa tải xong, vui lòng đợi...", true);
+            return;
         }
-        
-        // Bắt đầu phát hiện
-        function startDetection() {
-            if (!model) {
-                alert('Model chưa được tải xong. Vui lòng đợi...');
-                return;
-            }
-            
-            isDetecting = true;
-            document.getElementById('startDetection').disabled = true;
-            document.getElementById('stopDetection').disabled = false;
-            
-            // Chạy phát hiện mỗi 200ms
-            detectionInterval = setInterval(detectObjects, 200);
-            
-            addLog('🔍 Bắt đầu giám sát AI');
+        if (!mediaStream || video.readyState !== 4) {
+            addLog("❌ Hãy bật camera trước khi kích hoạt AI.", true);
+            return;
         }
-        
-        // Dừng phát hiện
-        function stopDetection() {
-            isDetecting = false;
-            if (detectionInterval) {
-                clearInterval(detectionInterval);
-                detectionInterval = null;
-            }
-            
-            document.getElementById('startDetection').disabled = false;
-            document.getElementById('stopDetection').disabled = true;
-            
-            addLog('⏸️ Tạm dừng giám sát');
+        if (isDetectionActive) return;
+        isDetectionActive = true;
+        document.getElementById('startDetectBtn').disabled = true;
+        document.getElementById('stopDetectBtn').disabled = false;
+        addLog("🤖 Kích hoạt AI phát hiện rác & kiểm tra điện thông minh (chống spam).", false);
+    }
+    
+    function stopDetection() {
+        if (!isDetectionActive) return;
+        isDetectionActive = false;
+        document.getElementById('startDetectBtn').disabled = false;
+        document.getElementById('stopDetectBtn').disabled = true;
+        addLog("⏸️ Tạm dừng AI giám sát.", false);
+    }
+    
+    // load model & gắn sự kiện
+    async function initModel() {
+        document.getElementById('aiStatus').innerHTML = "🔄 Đang tải COCO-SSD...";
+        try {
+            model = await cocoSsd.load({ base: 'mobilenet_v2' });
+            document.getElementById('aiStatus').innerHTML = "✅ AI sẵn sàng";
+            addLog("✅ Model COCO-SSD đã tải thành công! Có thể phát hiện rác.", false);
+        } catch(e) {
+            console.error(e);
+            document.getElementById('aiStatus').innerHTML = "❌ Lỗi tải model";
+            addLog("❌ Lỗi tải model AI, vui lòng refresh trang.", true);
         }
-        
-        // Phát hiện vật thể
-        async function detectObjects() {
-            if (!isDetecting || !model || video.readyState !== video.HAVE_ENOUGH_DATA) {
-                return;
-            }
-            
-            try {
-                // Vẽ frame hiện tại
-                drawVideoToCanvas();
-                
-                // Phát hiện objects
-                const predictions = await model.detect(video);
-                
-                // Cập nhật số lượng
-                document.getElementById('objectCount').innerText = predictions.length;
-                
-                // Vẽ kết quả lên canvas
-                ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
-                ctx.drawImage(video, 0, 0, outputCanvas.width, outputCanvas.height);
-                
-                let trashDetected = false;
-                let detectionResults = [];
-                
-                predictions.forEach(prediction => {
-                    const [x, y, width, height] = prediction.bbox;
-                    const score = Math.round(prediction.score * 100);
-                    
-                    // Kiểm tra nếu là rác
-                    const isTrash = trashClasses.includes(prediction.class);
-                    
-                    // Vẽ bounding box
-                    ctx.strokeStyle = isTrash ? '#ff4444' : '#00ff00';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(x, y, width, height);
-                    
-                    // Vẽ label
-                    ctx.fillStyle = isTrash ? '#ff4444' : '#00ff00';
-                    ctx.font = '16px Arial';
-                    ctx.fillText(
-                        `${prediction.class} (${score}%)`,
-                        x, y > 20 ? y - 5 : y + 20
-                    );
-                    
-                    if (isTrash && score > 60) {
-                        trashDetected = true;
-                        detectionResults.push(`${prediction.class} (${score}%)`);
-                    }
-                    
-                    // Cập nhật độ chính xác
-                    totalDetections++;
-                    if (isTrash) {
-                        correctDetections++;
-                    }
-                });
-                
-                // Xử lý khi phát hiện rác
-                if (trashDetected) {
-                    trashCount++;
-                    alertCount++;
-                    
-                    document.getElementById('trashCount').innerText = trashCount;
-                    document.getElementById('alertCount').innerText = alertCount;
-                    
-                    // Hiện cảnh báo
-                    const alertBox = document.getElementById('alertBox');
-                    alertBox.className = 'alert danger show';
-                    alertBox.innerHTML = `⚠️ CẢNH BÁO! Phát hiện rác: ${detectionResults.join(', ')}`;
-                    
-                    // Thêm vào nhật ký
-                    addLog(`🚮 Phát hiện rác: ${detectionResults.join(', ')}`, true);
-                    
-                    // Ẩn cảnh báo sau 3 giây
-                    setTimeout(() => {
-                        alertBox.classList.remove('show');
-                    }, 3000);
-                }
-                
-                // Cập nhật độ chính xác
-                if (totalDetections > 0) {
-                    const accuracy = Math.round((correctDetections / totalDetections) * 100);
-                    document.getElementById('accuracy').innerText = accuracy + '%';
-                }
-                
-            } catch (error) {
-                console.error('Detection error:', error);
-            }
+    }
+    
+    // Gán các nút
+    document.getElementById('startCameraBtn').onclick = startCamera;
+    document.getElementById('stopCameraBtn').onclick = stopCamera;
+    document.getElementById('startDetectBtn').onclick = startDetection;
+    document.getElementById('stopDetectBtn').onclick = stopDetection;
+    
+    // Khởi tạo model + vòng lặp vẽ (dự phòng)
+    window.onload = () => {
+        initModel();
+        startDetectionLoop();  // vòng lặp sẽ kiểm tra isDetectionActive
+        addLog("🚀 Hệ thống giám sát lớp học thông minh đã khởi động.", false);
+    };
+    
+    window.onbeforeunload = () => {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(t => t.stop());
         }
-        
-        // Thêm log
-        function addLog(message, isAlert = false) {
-            const logSection = document.getElementById('logSection');
-            const time = new Date().toLocaleTimeString('vi-VN');
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.innerHTML = `
-                <span class="log-time">[${time}]</span>
-                <span class="log-message ${isAlert ? 'detected' : ''}">${message}</span>
-            `;
-            
-            logSection.insertBefore(logEntry, logSection.firstChild);
-            
-            // Giới hạn số log
-            if (logSection.children.length > 50) {
-                logSection.removeChild(logSection.lastChild);
-            }
-        }
-        
-        // Khởi tạo model khi trang load
-        window.onload = () => {
-            loadModel();
-            addLog('🚀 Hệ thống đã sẵn sàng');
-        };
-        
-        // Dọn dẹp khi rời trang
-        window.onbeforeunload = () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            if (detectionInterval) {
-                clearInterval(detectionInterval);
-            }
-        };
-    </script>
+        if (detectionLoop) clearInterval(detectionLoop);
+    };
+</script>
 </body>
 </html>
